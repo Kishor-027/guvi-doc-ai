@@ -1,9 +1,0 @@
-services:
-  - type: web
-    name: guvi-doc-ai
-    dockerfile: ./Dockerfile
-    dockerContext: ./
-    envVars:
-      - key: API_KEY
-        value: test123
-
