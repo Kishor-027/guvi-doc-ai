@@ -1,86 +1,183 @@
-# GUVI Document Analysis API
+# 🚀 GUVI Document Analysis API
 
-## Overview
-A full-stack document analysis platform built with FastAPI and modern web technologies. Upload PDF, DOCX, or image files to get AI-powered summaries, entity extraction, and sentiment analysis instantly.
+## 📌 Overview
 
-## Features
-- 📄 **Multi-format Support**: PDF, DOCX, PNG, JPG, JPEG
-- 🤖 **AI Summarization**: Powered by Google Gemini
-- 🔍 **Entity Extraction**: Names, dates, organizations, amounts
-- 😊 **Sentiment Analysis**: Positive, Neutral, Negative classification
-- 📸 **OCR**: Tesseract-based optical character recognition for images
-- 🔐 **API Key Authentication**: Secure endpoints
-- 🎨 **Modern UI**: Interactive web interface with real-time processing
+A full-stack AI-powered document analysis platform built using FastAPI and modern web technologies.
+The system allows users to upload **PDF, DOCX, and image files** and instantly receive:
 
-## Tech Stack
+* 📄 Summaries
+* 🔍 Entity extraction
+* 😊 Sentiment analysis
+
+The application combines traditional text extraction techniques with **Google Gemini AI** for intelligent document understanding.
+
+---
+
+## ✨ Features
+
+* 📄 **Multi-format Support**
+  Supports PDF, DOCX, PNG, JPG, JPEG
+
+* 🤖 **AI Summarization**
+  Generates concise summaries using Gemini AI
+
+* 🔍 **Entity Extraction**
+  Extracts names, dates, organizations, and monetary values
+
+* 😊 **Sentiment Analysis**
+  Classifies content as Positive, Neutral, or Negative
+
+* 📸 **OCR Support**
+  Tesseract-based extraction for images
+
+* 🔐 **API Key Authentication**
+  Secures API endpoints
+
+* 🎨 **Modern UI**
+  Clean landing page with real-time processing
+
+---
+
+## 🧠 Architecture Overview
+
+The system follows a modular processing pipeline:
+
+1. **Input Layer**
+
+   * Receives base64 encoded file via API
+
+2. **Processing Layer**
+
+   * PDF → PyMuPDF
+   * DOCX → docx2txt
+   * Image → Tesseract OCR
+
+3. **AI Layer**
+
+   * Google Gemini API used for:
+
+     * Summarization
+     * Sentiment analysis
+     * Entity refinement
+
+4. **Output Layer**
+
+   * Returns structured JSON response:
+
+     * summary
+     * entities
+     * sentiment
+
+---
+
+## 🛠 Tech Stack
+
 ### Backend
-- Python 3.9+
-- FastAPI 0.135.3
-- PyMuPDF (PDF extraction)
-- docx2txt (DOCX extraction)
-- pytesseract (OCR)
-- Google Gen AI SDK (Gemini)
+
+* Python 3.9+
+* FastAPI
+* PyMuPDF
+* docx2txt
+* pytesseract
+* Google GenAI SDK (Gemini)
 
 ### Frontend
-- HTML5 + CSS3 + JavaScript
-- Tailwind CSS
-- Material Design Icons
 
-## Local Setup
+* HTML5, CSS3, JavaScript
+* Tailwind CSS
+* Material Icons
 
-### Prerequisites
-- Python 3.9 or higher
-- Tesseract OCR installed
-- Git
+### Deployment
 
-### Installation
+* Docker
+* Render
 
-1. **Clone repository**
+---
+
+## ⚙️ Local Setup
+
+### 🔧 Prerequisites
+
+* Python 3.9+
+* Tesseract OCR installed
+* Git
+
+---
+
+### 📥 Installation
+
 ```bash
-git clone https://github.com/your-username/guvi-doc-ai.git
+git clone https://github.com/Kishor-027/guvi-doc-ai.git
 cd guvi-doc-ai
 ```
 
-2. **Create virtual environment**
 ```bash
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\Activate
+venv\Scripts\activate   # Windows
 ```
 
-3. **Install dependencies**
 ```bash
 pip install -r requirements.txt
 ```
 
-4. **Install Tesseract** (for OCR)
-   - **Windows**: Download from https://github.com/UB-Mannheim/tesseract/wiki
-   - **macOS**: `brew install tesseract`
-   - **Linux**: `sudo apt-get install tesseract-ocr`
+---
 
-5. **Setup environment variables**
+### 🧾 Install Tesseract
+
+* Windows: https://github.com/UB-Mannheim/tesseract/wiki
+* macOS:
+
 ```bash
-cp .env.example .env
-# Edit .env and add:
-# API_KEY=test123
-# GEMINI_API_KEY=your_gemini_api_key_here
+brew install tesseract
 ```
 
-Get a Gemini API key from: https://ai.google.dev/
+* Linux:
 
-6. **Run server**
+```bash
+sudo apt-get install tesseract-ocr
+```
+
+---
+
+### 🔐 Environment Variables
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env`:
+
+```env
+API_KEY=test123
+GEMINI_API_KEY=your_api_key_here
+```
+
+---
+
+### ▶️ Run Server
+
 ```bash
 uvicorn main:app --reload
 ```
 
-Visit: http://localhost:8000
+Visit:
 
-## API Documentation
+```
+http://localhost:8000
+```
 
-### Endpoint: `/api/document-analyze`
+---
 
-**Method**: POST
+## 📡 API Documentation
 
-**Headers**:
+### Endpoint
+
+```
+POST /api/document-analyze
+```
+
+### Headers
+
 ```json
 {
   "Content-Type": "application/json",
@@ -88,92 +185,128 @@ Visit: http://localhost:8000
 }
 ```
 
-**Request Body**:
+---
+
+### 📤 Request Body
+
 ```json
 {
   "fileName": "sample.pdf",
   "fileType": "pdf",
-  "fileBase64": "BASE64_ENCODED_FILE"
+  "fileBase64": "BASE64_STRING"
 }
 ```
 
-**File Types**: `pdf`, `docx`, `image`
+Supported file types:
 
-**Response** (Success):
+* pdf
+* docx
+* image
+
+---
+
+### 📥 Response
+
 ```json
 {
   "status": "success",
   "fileName": "sample.pdf",
-  "summary": "Document summary text...",
+  "summary": "Document summary...",
   "entities": {
-    "names": ["John Doe"],
-    "dates": ["2026-04-03"],
-    "organizations": ["GUVI Inc"],
+    "names": ["Ravi Kumar"],
+    "dates": ["10 March 2026"],
+    "organizations": ["ABC Pvt Ltd"],
     "amounts": ["₹10,000"]
   },
   "sentiment": "Neutral"
 }
 ```
 
-## Deployment to Render
+---
 
-### Steps
-1. Push code to GitHub (with `.env` NOT committed)
-2. Connect GitHub repo to Render
-3. Create new Web Service
-4. Set build command: `pip install -r requirements.txt`
-5. Set start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
-6. Add environment variables in Render dashboard:
-   - `API_KEY=test123`
-   - `GEMINI_API_KEY=your_key`
-7. Deploy
+## 🌐 Live Demo
 
-## Project Structure
+* 🔗 App URL: https://guvi-doc-ai-1.onrender.com
+* 🔗 API Endpoint: https://guvi-doc-ai-1.onrender.com/api/document-analyze
+
+---
+
+## 🚀 Deployment (Render - Docker)
+
+This project uses Docker to support OCR dependencies.
+
+### Steps:
+
+1. Push code to GitHub
+2. Create new Web Service in Render
+3. Select **Environment: Docker**
+4. Set Dockerfile path:
+
+```
+Dockerfile
+```
+
+5. Add environment variables:
+
+```
+API_KEY=test123
+GEMINI_API_KEY=your_key
+```
+
+6. Deploy
+
+---
+
+## 📂 Project Structure
+
 ```
 .
-├── main.py                 # FastAPI application
+├── main.py
 ├── templates/
-│   └── index.html         # Frontend SPA
-├── requirements.txt        # Python dependencies
-├── .env.example           # Environment template
+│   └── index.html
+├── Dockerfile
+├── requirements.txt
+├── .env.example
+├── .gitignore
 └── README.md
 ```
 
-## File Limits
-- Maximum file size: **50 MB**
-- Supported image formats: PNG, JPG, JPEG
-- Supported document formats: PDF, DOCX
+---
 
-## Security Notes
-- API key validated on every request
-- Base64 file encoding prevents binary upload issues
-- No file storage - all processing in-memory
-- File size validation on both client and server
-- Input sanitization for entity extraction
+## 🔐 Security Notes
 
-## Troubleshooting
+* API key validation on every request
+* No file storage (in-memory processing)
+* Base64 encoding prevents file corruption
+* Input validation implemented
 
-**OCR not working?**
-- Windows: Ensure Tesseract is installed in `C:\Program Files\Tesseract-OCR\`
-- Verify path in main.py line 20
+---
 
-**Gemini API returns error?**
-- Check API key is valid and has quota remaining
-- Verify GEMINI_API_KEY is set in environment
-- Check internet connection
+## ⚠️ Known Limitations
 
-**Frontend not loading?**
-- Ensure `templates/index.html` exists
-- Clear browser cache (Ctrl+Shift+R)
-- Check FastAPI is running on correct port
+* OCR accuracy depends on image quality
+* Large files may take longer to process
+* Entity extraction may vary by document structure
+* Processing is synchronous (no queue system)
 
-## Performance
-- Average processing time: 5-10 seconds
-- Includes: text extraction, regex analysis, AI processing
-- Concurrent requests supported via FastAPI async handling
+---
 
-## Built For
-GUVI Hackathon 2026
+## ⚡ Performance
 
-## License
-MIT
+* Average processing time: **5–10 seconds**
+* Supports concurrent requests via FastAPI
+
+---
+
+## 🤖 AI Tools Used
+
+* ChatGPT — development guidance, debugging, architecture design, documentation
+* Google Gemini API — summarization, sentiment analysis, entity extraction
+* Stitch AI — landing page UI design
+* VS Code AI tools — integration and refinement
+
+---
+
+## 🏁 Built For
+
+**GUVI Hackathon 2026**
