@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>GUVI Document Analysis API</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-dim": "#4a5268",
+                        "primary": "#565e74",
+                        "secondary-dim": "#465469",
+                        "on-primary": "#f7f7ff",
+                        "on-error": "#fff7f6",
+                        "on-surface": "#2a3439",
+                        "surface-variant": "#d9e4ea",
+                        "on-secondary-fixed-variant": "#4e5c71",
+                        "on-background": "#2a3439",
+                        "error": "#9f403d",
+                        "surface": "#f7f9fb",
+                        "surface-bright": "#f7f9fb",
+                        "primary-fixed": "#dae2fd",
+                        "on-error-container": "#752121",
+                        "tertiary-dim": "#54506b",
+                        "primary-container": "#dae2fd",
+                        "background": "#f7f9fb",
+                        "surface-container-low": "#f0f4f7",
+                        "secondary-fixed": "#d5e3fd",
+                        "on-primary-container": "#4a5167",
+                        "secondary-fixed-dim": "#c7d5ee",
+                        "outline-variant": "#a9b4b9",
+                        "inverse-surface": "#0b0f10",
+                        "tertiary-container": "#e3dbfd",
+                        "surface-container": "#e8eff3",
+                        "inverse-primary": "#dae2fd",
+                        "error-container": "#fe8983",
+                        "on-primary-fixed-variant": "#535b71",
+                        "primary-fixed-dim": "#ccd4ee",
+                        "secondary": "#526075",
+                        "on-surface-variant": "#566166",
+                        "on-tertiary-fixed": "#3e3a54",
+                        "on-primary-fixed": "#373f54",
+                        "surface-dim": "#cfdce3",
+                        "surface-container-highest": "#d9e4ea",
+                        "error-dim": "#4e0309",
+                        "tertiary-fixed": "#e3dbfd",
+                        "inverse-on-surface": "#9a9d9f",
+                        "tertiary-fixed-dim": "#d4cdee",
+                        "tertiary": "#605c78",
+                        "on-tertiary-container": "#514d68",
+                        "on-tertiary": "#fcf7ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-fixed": "#324054",
+                        "outline": "#717c82",
+                        "on-tertiary-fixed-variant": "#5b5672",
+                        "secondary-container": "#d5e3fd",
+                        "on-secondary": "#f8f8ff",
+                        "surface-container-high": "#e1e9ee",
+                        "on-secondary-container": "#455367",
+                        "surface-tint": "#565e74"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .json-display {
+            background: #0b0f10;
+            color: #dae2fd;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .json-key { color: #ccd4ee; }
+        .json-string { color: #d4cdee; }
+        .json-number { color: #ccd4ee; }
+        .json-null { color: #b0b4b9; }
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #e0e0e0;
+            border-top-color: #565e74;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .error-message {
+            background: #fe8983;
+            color: #752121;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .success-message {
+            background: #c7d5ee;
+            color: #373f54;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface">
+<!-- Top Navigation Bar -->
+<nav class="bg-slate-50 dark:bg-slate-900 w-full top-0 flat no shadows">
+    <div class="flex justify-between items-center px-8 py-6 max-w-7xl mx-auto">
+        <div class="text-xl font-bold tracking-tighter text-slate-900 dark:text-slate-100 font-['Space_Grotesk'] tracking-tight">
+            GUVI Document Analysis API
+        </div>
+        <div class="hidden md:flex items-center gap-8 text-slate-600 dark:text-slate-400 font-['Space_Grotesk'] tracking-tight">
+            <a class="text-slate-900 dark:text-white border-b-2 border-slate-900 dark:border-white pb-1 cursor-pointer active:opacity-70 transition-colors" href="/docs">Docs</a>
+            <a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer active:opacity-70" href="/health">Health</a>
+        </div>
+        <div class="md:hidden">
+            <span class="material-symbols-outlined">menu</span>
+        </div>
+    </div>
+</nav>
+
+<main>
+<!-- Hero Section -->
+<section class="bg-surface px-8 pt-20 pb-32 max-w-7xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        <div class="lg:col-span-7">
+            <h1 class="text-[3.5rem] font-bold leading-[1.1] tracking-[-0.02em] text-on-surface mb-6">
+                AI-Powered Document Analysis API
+            </h1>
+            <p class="text-lg text-on-surface-variant font-body leading-relaxed max-w-xl mb-10">
+                Analyze PDFs, DOCX files, and images using AI. Extract summaries, entities, and sentiment instantly.
+            </p>
+            <div class="flex flex-wrap gap-4">
+                <a class="bg-primary text-on-primary px-8 py-4 rounded-lg font-medium text-base hover:opacity-90 transition-opacity" href="#demo">
+                    Try Demo
+                </a>
+                <a class="bg-surface-container-high text-on-surface px-8 py-4 rounded-lg font-medium text-base hover:bg-surface-container-highest transition-colors" href="/docs">
+                    View API Docs
+                </a>
+            </div>
+        </div>
+        <div class="lg:col-span-5 relative">
+            <div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm border border-outline-variant/10">
+                <img alt="Document Analysis API Illustration" class="w-full h-auto rounded shadow-inner" src="https://backendless.com/wp-content/uploads/2022/02/API-Documentation-Tools-Best-Tools-for-Generating-API-Docs-1.png">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section (Bento Style) -->
+<section class="bg-surface-container-low px-8 py-24">
+    <div class="max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="bg-surface-container-lowest p-8 rounded-xl flex flex-col gap-4">
+                <span class="material-symbols-outlined text-primary text-3xl">description</span>
+                <h3 class="text-xl font-bold font-headline">Multi-format Support</h3>
+                <p class="text-sm text-on-surface-variant leading-relaxed">Supports PDF, DOCX, and Image (OCR using Tesseract).</p>
+            </div>
+            <div class="bg-surface-container-lowest p-8 rounded-xl flex flex-col gap-4">
+                <span class="material-symbols-outlined text-primary text-3xl">summarize</span>
+                <h3 class="text-xl font-bold font-headline">AI Summarization</h3>
+                <p class="text-sm text-on-surface-variant leading-relaxed">Generate concise summaries using Gemini AI.</p>
+            </div>
+            <div class="bg-surface-container-lowest p-8 rounded-xl flex flex-col gap-4">
+                <span class="material-symbols-outlined text-primary text-3xl">database</span>
+                <h3 class="text-xl font-bold font-headline">Entity Extraction</h3>
+                <p class="text-sm text-on-surface-variant leading-relaxed">Extract names, dates, organizations, and monetary values.</p>
+            </div>
+            <div class="bg-surface-container-lowest p-8 rounded-xl flex flex-col gap-4">
+                <span class="material-symbols-outlined text-primary text-3xl">sentiment_satisfied</span>
+                <h3 class="text-xl font-bold font-headline">Sentiment Analysis</h3>
+                <p class="text-sm text-on-surface-variant leading-relaxed">Detect document sentiment (Positive, Neutral, Negative).</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Demo Section -->
+<section id="demo" class="bg-surface px-8 py-24 max-w-7xl mx-auto">
+    <h2 class="text-[1.75rem] font-bold font-headline mb-12">Try It Now</h2>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <!-- Upload Area -->
+        <div class="flex flex-col gap-6">
+            <div class="p-8 border-2 border-dashed border-outline-variant/40 rounded-xl hover:border-primary/60 transition-colors cursor-pointer bg-surface-container-lowest" onclick="document.getElementById('fileInput').click()">
+                <input type="file" id="fileInput" class="hidden" accept=".pdf,.docx,.png,.jpg,.jpeg" onchange="handleFileSelect(event)">
+                <div class="flex flex-col items-center gap-3 text-center">
+                    <span class="material-symbols-outlined text-primary text-4xl">cloud_upload</span>
+                    <div>
+                        <p class="font-medium text-on-surface">Upload document</p>
+                        <p class="text-sm text-on-surface-variant">PDF, DOCX, PNG, JPG, JPEG</p>
+                    </div>
+                </div>
+            </div>
+            <div id="fileInfo" class="hidden p-4 bg-surface-container-high rounded-lg">
+                <p class="text-sm"><span class="text-primary font-medium">File:</span> <span id="fileName"></span></p>
+                <p class="text-sm"><span class="text-primary font-medium">Size:</span> <span id="fileSize"></span></p>
+            </div>
+            <button id="submitBtn" class="hidden bg-primary text-on-primary px-6 py-3 rounded-lg font-medium hover:opacity-90 transition-opacity w-full" onclick="submitFile()">
+                Analyze Document
+            </button>
+        </div>
+        <!-- Response Area -->
+        <div class="flex flex-col gap-6">
+            <div id="loadingState" class="hidden p-6 bg-surface-container-high rounded-xl text-center">
+                <div class="flex items-center justify-center gap-2">
+                    <div class="spinner"></div>
+                    <span class="text-on-surface-variant">Processing document...</span>
+                </div>
+            </div>
+            <div id="errorState" class="hidden"></div>
+            <div id="successState" class="hidden">
+                <div class="success-message mb-4" id="successMsg"></div>
+                <div class="space-y-4">
+                    <div class="bg-surface-container-lowest p-4 rounded-lg">
+                        <h4 class="text-sm font-medium text-on-surface mb-2">Summary</h4>
+                        <p class="text-sm text-on-surface-variant leading-relaxed" id="summaryText"></p>
+                    </div>
+                    <div class="bg-surface-container-lowest p-4 rounded-lg">
+                        <h4 class="text-sm font-medium text-on-surface mb-2">Sentiment</h4>
+                        <div id="sentimentBadge" class="inline-block px-3 py-1 rounded-full text-xs font-medium"></div>
+                    </div>
+                    <div class="bg-surface-container-lowest p-4 rounded-lg">
+                        <h4 class="text-sm font-medium text-on-surface mb-3">Entities</h4>
+                        <div id="entitiesContainer" class="space-y-3 text-sm"></div>
+                    </div>
+                    <div class="mt-6">
+                        <h4 class="text-sm font-medium text-on-surface mb-2">Full Response</h4>
+                        <div id="jsonResponse" class="json-display"></div>
+                    </div>
+                    <button class="w-full bg-surface-container-high text-on-surface px-4 py-2 rounded-lg text-sm hover:bg-surface-container transition-colors" onclick="resetForm()">
+                        Analyze Another Document
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- API Documentation Section -->
+<section class="bg-surface px-8 py-24 max-w-7xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+        <div>
+            <h2 class="text-[1.75rem] font-bold font-headline mb-4">API Usage</h2>
+            <p class="text-on-surface-variant mb-8">Direct endpoint integration with JSON-based file processing.</p>
+            <div class="flex items-center gap-3 mb-8">
+                <span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full font-label text-xs font-bold">POST</span>
+                <code class="font-mono text-sm bg-surface-container-high px-3 py-1 rounded">/api/document-analyze</code>
+            </div>
+            <div class="space-y-6">
+                <div class="p-6 bg-surface-container-lowest rounded-xl border border-outline-variant/15">
+                    <h4 class="font-label text-xs text-on-surface-variant uppercase tracking-wider mb-4">Endpoint Headers</h4>
+                    <div class="space-y-2 text-sm font-mono">
+                        <p><span class="text-primary font-bold">Content-Type:</span> application/json</p>
+                        <p><span class="text-primary font-bold">x-api-key:</span>&nbsp;test123</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="space-y-8">
+            <!-- Sample Request -->
+            <div class="rounded-xl overflow-hidden shadow-sm">
+                <div class="bg-surface-container-highest px-4 py-2 border-b border-outline-variant/10 flex justify-between items-center">
+                    <span class="text-xs font-label font-medium text-on-surface-variant uppercase">Sample Request</span>
+                </div>
+                <div class="bg-inverse-surface p-6 font-mono text-sm leading-relaxed overflow-x-auto">
+                    <pre class="text-on-primary-container"><code class="text-[#dae2fd]">{
+  <span class="text-[#ccd4ee]">"fileName"</span>: <span class="text-[#d4cdee]">"sample.pdf"</span>,
+  <span class="text-[#ccd4ee]">"fileType"</span>: <span class="text-[#d4cdee]">"pdf"</span>,
+  <span class="text-[#ccd4ee]">"fileBase64"</span>: <span class="text-[#d4cdee]">"BASE64_STRING"</span>
+}</code></pre>
+                </div>
+            </div>
+            <!-- Sample Response -->
+            <div class="rounded-xl overflow-hidden shadow-sm">
+                <div class="bg-surface-container-highest px-4 py-2 border-b border-outline-variant/10 flex justify-between items-center">
+                    <span class="text-xs font-label font-medium text-on-surface-variant uppercase">Sample Response</span>
+                </div>
+                <div class="bg-inverse-surface p-6 font-mono text-sm leading-relaxed overflow-x-auto">
+                    <pre class="text-on-primary-container"><code class="text-[#dae2fd]">{
+  <span class="text-[#ccd4ee]">"status"</span>: <span class="text-[#d4cdee]">"success"</span>,
+  <span class="text-[#ccd4ee]">"fileName"</span>: <span class="text-[#d4cdee]">"sample.pdf"</span>,
+  <span class="text-[#ccd4ee]">"summary"</span>: <span class="text-[#d4cdee]">"..."</span>,
+  <span class="text-[#ccd4ee]">"entities"</span>: {...},
+  <span class="text-[#ccd4ee]">"sentiment"</span>: <span class="text-[#d4cdee]">"Neutral"</span>
+}</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</main>
+
+<!-- Footer Section -->
+<footer class="bg-slate-50 dark:bg-slate-900 border-t-0 font-['Inter'] text-sm leading-relaxed">
+    <div class="flex flex-col md:flex-row justify-between items-center px-8 py-12 max-w-7xl mx-auto">
+        <div class="flex flex-col items-center md:items-start gap-2">
+            <div class="text-lg font-bold text-slate-900 dark:text-slate-100">GUVI Document Analysis API</div>
+            <div class="text-slate-500 dark:text-slate-400">Built for GUVI Hackathon 2026</div>
+        </div>
+        <div class="mt-8 md:mt-0 flex gap-8">
+            <a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" href="/docs">Documentation</a>
+            <a class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" href="/health">Health Check</a>
+        </div>
+    </div>
+</footer>
+
+<script>
+const API_KEY = 'test123';
+const API_BASE_URL = '';
+let selectedFile = null;
+
+function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/png', 'image/jpeg', 'image/jpg'];
+    if (!validTypes.includes(file.type)) {
+        showError('Invalid file type. Please upload PDF, DOCX, or image files only.');
+        return;
+    }
+
+    // Validate file size (max 50MB)
+    if (file.size > 50 * 1024 * 1024) {
+        showError('File too large. Maximum size is 50MB.');
+        return;
+    }
+
+    selectedFile = file;
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('fileSize').textContent = (file.size / 1024).toFixed(2) + ' KB';
+    document.getElementById('fileInfo').classList.remove('hidden');
+    document.getElementById('submitBtn').classList.remove('hidden');
+    document.getElementById('errorState').classList.add('hidden');
+    document.getElementById('successState').classList.add('hidden');
+}
+
+function getFileType(fileName) {
+    const ext = fileName.split('.').pop().toLowerCase();
+    if (ext === 'pdf') return 'pdf';
+    if (ext === 'docx') return 'docx';
+    if (['png', 'jpg', 'jpeg'].includes(ext)) return 'image';
+    return null;
+}
+
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        try {
+            const reader = new FileReader();
+            reader.onload = () => {
+                const base64String = reader.result.split(',')[1];
+                resolve(base64String);
+            };
+            reader.onerror = (error) => {
+                reject(error);
+            };
+            reader.readAsDataURL(file);
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
+async function submitFile() {
+    if (!selectedFile) return;
+
+    const fileType = getFileType(selectedFile.name);
+    if (!fileType) {
+        showError('Unable to detect file type. Please use PDF, DOCX, or image files.');
+        return;
+    }
+
+    // Show loading state
+    document.getElementById('loadingState').classList.remove('hidden');
+    document.getElementById('errorState').classList.add('hidden');
+    document.getElementById('successState').classList.add('hidden');
+    document.getElementById('submitBtn').disabled = true;
+
+    try {
+        // Convert file to base64
+        const base64 = await fileToBase64(selectedFile);
+
+        // Prepare request
+        const payload = {
+            fileName: selectedFile.name,
+            fileType: fileType,
+            fileBase64: base64
+        };
+
+        // Create abort controller with 2-minute timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 120000);
+
+        // Send request
+        const response = await fetch(`${API_BASE_URL}/api/document-analyze`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': API_KEY
+            },
+            body: JSON.stringify(payload),
+            signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            showError(data.detail || 'An error occurred while processing the document.');
+            return;
+        }
+
+        displayResult(data);
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            showError('Request timeout (2 minutes). The file may be too large or the service is overloaded. Please try a smaller file.');
+        } else {
+            showError('Error: ' + error.message);
+        }
+    } finally {
+        document.getElementById('loadingState').classList.add('hidden');
+        document.getElementById('submitBtn').disabled = false;
+    }
+}
+
+function displayResult(data) {
+    document.getElementById('successState').classList.remove('hidden');
+    document.getElementById('successMsg').textContent = 'Document analyzed successfully!';
+
+    // Summary
+    document.getElementById('summaryText').textContent = data.summary || 'No summary available.';
+
+    // Sentiment
+    const sentimentBadge = document.getElementById('sentimentBadge');
+    const sentiment = data.sentiment || 'Neutral';
+    let bgColor = 'bg-primary-container';
+    if (sentiment === 'Positive') bgColor = 'bg-primary-fixed';
+    if (sentiment === 'Negative') bgColor = 'bg-error-container';
+    sentimentBadge.className = `inline-block px-3 py-1 rounded-full text-xs font-medium ${bgColor}`;
+    sentimentBadge.textContent = sentiment;
+
+    // Entities
+    const entities = data.entities || {};
+    const entitiesContainer = document.getElementById('entitiesContainer');
+    entitiesContainer.innerHTML = '';
+
+    const categories = [
+        { key: 'names', label: 'Names', icon: 'person' },
+        { key: 'dates', label: 'Dates', icon: 'event' },
+        { key: 'organizations', label: 'Organizations', icon: 'business' },
+        { key: 'amounts', label: 'Amounts', icon: 'attach_money' }
+    ];
+
+    categories.forEach(cat => {
+        const items = entities[cat.key] || [];
+        if (items.length > 0) {
+            const html = `
+                <div>
+                    <p class="font-medium text-on-surface flex items-center gap-2 mb-2">
+                        <span class="material-symbols-outlined text-sm">${cat.icon}</span>
+                        ${cat.label}
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        ${items.map(item => `<span class="bg-surface-container px-2 py-1 rounded text-xs">${escapeHtml(item)}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+            entitiesContainer.innerHTML += html;
+        }
+    });
+
+    // Clean response for display (remove debug field)
+    const cleanResponse = {
+        status: data.status,
+        fileName: data.fileName,
+        summary: data.summary,
+        entities: data.entities,
+        sentiment: data.sentiment
+    };
+
+    // Full JSON response (formatted)
+    document.getElementById('jsonResponse').textContent = JSON.stringify(cleanResponse, null, 2);
+
+    window.scrollTo({ top: document.getElementById('demo').offsetTop, behavior: 'smooth' });
+}
+
+function showError(message) {
+    document.getElementById('errorState').innerHTML = `<div class="error-message">${escapeHtml(message)}</div>`;
+    document.getElementById('errorState').classList.remove('hidden');
+    document.getElementById('successState').classList.add('hidden');
+}
+
+function resetForm() {
+    selectedFile = null;
+    document.getElementById('fileInput').value = '';
+    document.getElementById('fileInfo').classList.add('hidden');
+    document.getElementById('submitBtn').classList.add('hidden');
+    document.getElementById('successState').classList.add('hidden');
+    document.getElementById('loadingState').classList.add('hidden');
+    document.getElementById('errorState').classList.add('hidden');
+}
+
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
+</script>
+</body>
+</html>
