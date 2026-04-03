@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: guvi-doc-ai
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9
+    routes:
+      - path: /
+        destination: /
+      - path: /api
+        destination: /api
+      - path: /docs
+        destination: /docs
+      - path: /health
+        destination: /health

@@ -10,6 +10,8 @@ import fitz
 from PIL import Image
 from dotenv import load_dotenv
 from fastapi import FastAPI, Header, HTTPException
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from google import genai
 from pydantic import BaseModel
 import pytesseract
@@ -19,6 +21,10 @@ if os.name == "nt":
 load_dotenv()
 
 app = FastAPI(title="GUVI Document Analysis API")
+
+# Serve static files
+if os.path.exists("static"):
+    app.mount("/static", StaticFiles(directory="static"), name="static")
 
 API_KEY = os.getenv("API_KEY", "test123")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
@@ -39,10 +45,17 @@ def verify_api_key(x_api_key: str = Header(None)):
 
 @app.get("/")
 def root():
+    if os.path.exists("templates/index.html"):
+        return FileResponse("templates/index.html", media_type="text/html")
     return {
         "status": "success",
         "message": "API is running"
     }
+
+
+@app.get("/favicon.ico")
+def favicon():
+    return {"message": "ok"}
 
 
 @app.get("/health")
@@ -480,11 +493,16 @@ def document_analyze(request: DocumentRequest, x_api_key: str = Header(None)):
 
     try:
         file_bytes = base64.b64decode(request.fileBase64, validate=True)
-    except Exception:
+    except Exception as e:
         raise HTTPException(status_code=400, detail="Invalid base64")
 
     if not file_bytes:
         raise HTTPException(status_code=400, detail="Decoded file is empty")
+    
+    # Validate file size (max 50MB)
+    max_size = 50 * 1024 * 1024  # 50MB
+    if len(file_bytes) > max_size:
+        raise HTTPException(status_code=413, detail=f"File too large. Maximum size is 50MB.")
 
     try:
         extracted_text = extract_text(file_bytes, file_type)
@@ -506,12 +524,7 @@ def document_analyze(request: DocumentRequest, x_api_key: str = Header(None)):
                 "organizations": [],
                 "amounts": []
             },
-            "sentiment": "Neutral",
-            "debug": {
-                "decodedBytes": len(file_bytes),
-                "extractedTextLength": 0,
-                "message": "No text extracted. The file may be scanned, truncated, or contain no selectable text."
-            }
+            "sentiment": "Neutral"
         }
 
     regex_entities = extract_entities_regex(cleaned_text)
@@ -522,10 +535,5 @@ def document_analyze(request: DocumentRequest, x_api_key: str = Header(None)):
         "fileName": request.fileName,
         "summary": summary,
         "entities": final_entities,
-        "sentiment": sentiment,
-        "debug": {
-            "decodedBytes": len(file_bytes),
-            "extractedTextLength": len(cleaned_text),
-            "summarySource": output_source
-        }
+        "sentiment": sentiment
     }
